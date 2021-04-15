@@ -2,7 +2,7 @@ This is a test task on your ability to use :method_missing in ruby. Given a json
 
 NOTE: you should NOT hardcode db.json structure in JsonDb class. The json can be changed and your class should work with another json as well.
 
-We expect you to form the repo and send us a link to your copy of the repo once you are done with the test.
+We expect you to fork the repo and send us a link to your copy of the repo once you are done with the test.
 
 Complexity Level #1: read properties on all levels
 Complexity Level #2: write properties on all levels
