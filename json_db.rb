@@ -11,7 +11,7 @@ class JsonDb
     @data ||= JSON.parse(IO.read(json_filename))
   end
   
-  #private
+  private
   
   # Use this method to store updated properties on disk
   def serialize
