@@ -6,7 +6,7 @@ We expect you to fork the repo and send us a link to your copy of the repo once 
 
 Complexity Level #1: read properties on all levels
 Complexity Level #2: write properties on all levels
-Complexity Level #3: reads instances of dynamically defined classes on all levels
+Complexity Level #3: read instances of dynamically defined classes on all levels
 
 In order to run rspec you should install the gem:
 
