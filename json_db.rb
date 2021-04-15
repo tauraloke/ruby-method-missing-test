@@ -8,14 +8,14 @@ class JsonDb
   attr_reader :json_filename
   
   def data
-    @data ||= JSON.parse(IO.read(@json_filename))
+    @data ||= JSON.parse(IO.read(json_filename))
   end
   
-  private
+  #private
   
   # Use this method to store updated properties on disk
   def serialize
-    IO.write(json_filename, data)
+    IO.write(json_filename, data.to_json)
   end
 
   def method_missing(method_name, *args, &block)

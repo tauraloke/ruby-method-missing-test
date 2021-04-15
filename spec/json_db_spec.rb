@@ -5,6 +5,7 @@ RSpec.describe JsonDb do
   before(:example) do
     system("cp ./db.json /tmp/db.json")
     @db = JsonDb.new("/tmp/db.json")
+    @db.serialize
   end
   
   # Sample implementation with :method_missing
