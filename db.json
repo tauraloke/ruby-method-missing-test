@@ -1,0 +1,36 @@
+{
+  "name": "A database of companies",
+  "created_at": "Apr 14, 2021",
+  "companies": [
+	  {  
+		  "name": "LeanSquad, LLC",
+		  "location": "Atlanta, GA",
+		  "employees": [
+			  {
+				  "first_name": "Andrew",
+				  "last_name": "Tabit"
+			  },
+			  {
+				  "first_name": "John",
+				  "last_name": "Smith"
+			  }
+		  ]
+	  },
+	  {  
+		  "name": "Google, LLC",
+		  "products": [
+			  {
+			  	  "name": "Google Maps",
+				  "url": "https://maps.google.com"
+			  },
+			  {
+			  	  "name": "Gmail",
+				  "url": "https://gmail.com"
+			  }
+		  ]
+	  },
+	  {  
+		  "name": "Microsoft, Inc."
+	  }
+  ]
+}
