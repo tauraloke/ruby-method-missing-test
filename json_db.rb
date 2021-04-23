@@ -1,42 +1,35 @@
 require 'json'
 require 'active_support/inflector'
-#
-require 'pry'
 
 class JsonDb
 
   ALLOWED_SUFFIXES = %w[=].freeze
-  attr_accessor :json_filename, :root_json_db
+  attr_accessor :json_filename, :root_json_db, :data
 
   class << self
     attr_accessor :name
+
+    def create_child_node(data, classname = nil, root_json_db = nil)
+      dynamic_class = Class.new(self)
+      dynamic_class.name = classname
+      child_node = dynamic_class.new(root_json_db.json_filename)
+      child_node.root_json_db = root_json_db
+      child_node.data = child_node.redeclare_fields(data)
+      return child_node
+    end
   end
 
   def initialize(json_filename)
-    @json_filename = json_filename
-    @root_json_db = self
+      @json_filename = json_filename
+      @root_json_db = self
   end
 
-  def self.create_child_node(data, classname = nil, root_json_db = nil)
-    dynamic_class = Class.new(self.class)
-    dynamic_class.class.name = classname
-    child_node = dynamic_class.new(data, classname, root_json_db)
-    child_node.json_filename = root_json_db.json_filename
-    child_node.root_json_db = root_json_db
-    child_node.data = redeclare_fields(data)
-    return child_node
-  end
-  
   def data
     @data ||= redeclare_fields(JSON.parse(IO.read(@json_filename)))
   end
 
-  def data=(hash)
-    @data = hash
-  end
-
   def [](field)
-    data[field.to_s]
+    @data[field.to_s]
   end
 
   def []=(field, value)
@@ -46,26 +39,30 @@ class JsonDb
   end
 
   def to_json(options)
-    self.data.to_json(options)
+    @data.to_json(options)
   end
   
-  private
-
+  # Use this method to store updated properties on disk
+  def serialize
+    IO.write(json_filename, @root_json_db.data.to_json)
+  end
+  
   def redeclare_fields(hash)
     hash.each do |key, value|
       hash[key] = redeclare_object(value, key)
     end
     hash
-  end
+  end 
+  
+  private
 
   def redeclare_object(data, key, new_name = nil)
     case data.class.name
     when Hash.to_s
-      self.create_child_node(data, new_name, self.root_json_db)
+      self.class.create_child_node(data, new_name, self.root_json_db)
     when Array.to_s
       data.map do |row|
-        binding.pry
-        new_name = self.key_to_class_name(key)
+        new_name = key_to_class_name(key)
         row = redeclare_object(row, key, new_name)
       end
     else
@@ -75,11 +72,6 @@ class JsonDb
 
   def key_to_class_name(key)
     ActiveSupport::Inflector.singularize(key).capitalize
-  end
-  
-  # Use this method to store updated properties on disk
-  def serialize
-    IO.write(json_filename, @root_json_db.data.to_json)
   end
 
   def method_missing(method_name, *args, &block)
@@ -104,7 +96,7 @@ class JsonDb
   end
 
   def assign_property(name, value)
-    data[name] = value
+    @data[name] = value
   end
   
 end
