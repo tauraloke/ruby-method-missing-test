@@ -1,36 +1,38 @@
 require 'json'
 require 'active_support/inflector'
 #
-#require 'pry'
+require 'pry'
 
 class JsonDb
 
   ALLOWED_SUFFIXES = %w[=].freeze
-  attr_reader :json_filename
+  attr_accessor :json_filename, :root_json_db
 
   class << self
     attr_accessor :name
   end
 
-  def initialize(data, classname = nil, root_json_db = nil)
-    @is_root = data.class.name == String.to_s
-    if @is_root
-      @json_filename = data
-      self.class.name = 'Root'
-      @root_json_db = self
-    else
-      @json_filename = root_json_db.json_filename
-      self.class.name = classname
-      @root_json_db = root_json_db
-      @data = redeclare_fields(data)
-    end
+  def initialize(json_filename)
+    @json_filename = json_filename
+    @root_json_db = self
+  end
+
+  def self.create_child_node(data, classname = nil, root_json_db = nil)
+    dynamic_class = Class.new(self.class)
+    dynamic_class.class.name = classname
+    child_node = dynamic_class.new(data, classname, root_json_db)
+    child_node.json_filename = root_json_db.json_filename
+    child_node.root_json_db = root_json_db
+    child_node.data = redeclare_fields(data)
+    return child_node
   end
   
   def data
-    unless @data.present?
-      @data = redeclare_fields(JSON.parse(IO.read(@json_filename)))
-    end
-    @data
+    @data ||= redeclare_fields(JSON.parse(IO.read(@json_filename)))
+  end
+
+  def data=(hash)
+    @data = hash
   end
 
   def [](field)
@@ -41,6 +43,10 @@ class JsonDb
     value = assign_property(field, value)
     serialize
     value
+  end
+
+  def to_json(options)
+    self.data.to_json(options)
   end
   
   private
@@ -55,10 +61,11 @@ class JsonDb
   def redeclare_object(data, key, new_name = nil)
     case data.class.name
     when Hash.to_s
-      self.class.new(data, new_name, self)
+      self.create_child_node(data, new_name, self.root_json_db)
     when Array.to_s
       data.map do |row|
-        new_name = key_to_class_name(key)
+        binding.pry
+        new_name = self.key_to_class_name(key)
         row = redeclare_object(row, key, new_name)
       end
     else
